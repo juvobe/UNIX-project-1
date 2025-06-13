@@ -21,8 +21,8 @@ LIST *freeMemory(LIST *start);
 
 //Main method
 int main(int argc, char *argv[]){
-    char *inputFileName;
-    char *outputFileName;
+    char *inputFileName = NULL;
+    char *outputFileName = NULL;
     LIST *start = NULL;
     
     if(argc == 1){ // No command line arguments, get filename from standard input
