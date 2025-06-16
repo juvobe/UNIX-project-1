@@ -23,11 +23,13 @@ LIST *freeMemory(LIST *start);
 int main(int argc, char *argv[]){
     char *inputFileName = NULL;
     char *outputFileName = NULL;
+    size_t nameLen = 0;
     LIST *start = NULL;
     
     if(argc == 1){ // No command line arguments, get filename from standard input
-        fprintf(stdout, "Give input filename:");
-        fgets(inputFileName, sizeof(inputFileName), stdin); // Used fgets for reading the input, instead of getline, since it's just the filename and nothing else
+        fprintf(stdout, "Give input filename: ");
+        getline(&inputFileName, &nameLen, stdin);
+        inputFileName[strcspn(inputFileName, "\n")] = 0; //Clear newline from file name, found strcspn function from here: https://stackoverflow.com/questions/2693776/removing-trailing-newline-character-from-fgets-input
         start = readFile(inputFileName);
         writeFile("", start); // Empty string means printing the result to standard output
 
@@ -37,8 +39,8 @@ int main(int argc, char *argv[]){
         writeFile("", start); // Empty string means printing to stdout
 
     } else if(argc == 3){ //Two command line arguments, first is read file, second is write file
-        if(argv[1] == argv[2]){ // If filenames are exactly the same, an error is raised
-            fprintf(stderr, "Input and output file must differ.\n");
+        if(strcmp(argv[1], argv[2]) == 0){ // If filenames are exactly the same, an error is raised
+            fprintf(stderr, "Input and output file must differ\n");
             exit(1);
         } else{
             inputFileName = argv[1];
@@ -89,7 +91,7 @@ LIST *readFile(char name[]){
                 strcpy(newLine->line, line);
                 strcat(newLine->line, "\n");
             } else{
-                //There is a newline after the last line, so one less memory allocated and no newline added in the end
+                //There is a newline after the last line, so one less added to the length of the line and no newline added in the end
                 newLine->line = (char*)malloc(strlen(line)+1);
                 if(newLine->line == NULL){
                     fprintf(stderr, "Malloc failed.\n");
@@ -141,6 +143,7 @@ LIST *freeMemory(LIST *start){
     LIST *ptr = start;
     LIST *next;
 
+    //While loop where memory is freed line by line
     while (ptr != NULL){
         next = ptr->next;
         free(ptr->line);
